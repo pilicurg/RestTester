@@ -1,14 +1,15 @@
 {
 	"host":"http://10.0.0.0",
 	
-	"Auth":{
+	"auth":{
+		"name":"basic",
 		"url":"api/simulate",
 		"save_cookies":true
 	},
 
-	"TestList":[
-		"Test1.json",
-		"Test2.json"
+	"list":[
+		"TC1",
+		"TC2.json"
 	]
 
 }

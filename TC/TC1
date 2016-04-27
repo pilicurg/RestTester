@@ -1,0 +1,25 @@
+{
+    "url":{
+        "api/query"
+    },
+
+    "auth":{
+    },
+
+    "method":{
+        "GET"
+    },
+
+    "request":{
+        "header":{
+
+        },
+        "body":{
+
+        },
+    },
+
+    "assertion":{
+
+    }
+}
