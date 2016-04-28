@@ -6,28 +6,45 @@ import os.path
 import json
 
 class Parser(object):
-    def __init__(self, list_file):
-        self._d = {}
-        with open(list_file) as f:
-            self._data = json.load(f)
+    def __init__(self):
+        self.list_name = "TC_list.json"
+        self.parsed = []
+        
+    def set_suite(self, suite):
+        self.suite = suite
+        self._load_suite()
 
-    def _tc_files(self):
-         return self._data.get(u'list',[])
+    def _load_suite(self):
+        tc_list = os.path.join(self.suite, self.list_name)
+        with open(tc_list) as f:
+            self.data = json.load(f)
 
     def get_data(self):
-        return self._data
+        return self.data
 
-    def encode(self):
-        for tc in self._tc_files():
-            tc_name = os.path.basename(tc)
-            self._d[tc_name] = {}
+    def _parse_auth(self):
+        if self.data.get(u'auth'):
+            self.parsed.append({'url':self.data.get(u'auth').get('url'),
+                                ''
+
+
+
+                                })
+
+
+
+    def parse(self):
+        self._parse_auth()
+        self._parse_tc()
+
+
 
 
 if __name__ == '__main__':
-    
-    file_name = "TC/TC_list.json"
-    project_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'..'))
-    list_file = os.path.normpath(os.path.join(project_dir, file_name))
+    p = Parser()
 
-    p = Parser(list_file)
-    p.encode()
+    suite = os.path.normpath(os.path.join(os.path.dirname(__file__),'../TC'))
+    p.set_suite(suite)
+
+    print p.get_data()
+    print p.parse()
