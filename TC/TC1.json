@@ -1,9 +1,11 @@
 {
-    "url":{
-        "api/query"
+    "api":{
+        "/api/query"
     },
 
     "auth":{
+        "category":"basic",
+        "run":"once"
     },
 
     "method":{

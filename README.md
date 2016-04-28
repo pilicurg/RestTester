@@ -5,4 +5,4 @@ a REST tester written in Python
 scripts in Python
 
 ## TC
-Test cases that are defined by user
+Test cases that are defined by user, each folder stands a complete test suite
