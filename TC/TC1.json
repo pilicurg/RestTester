@@ -1,27 +1,10 @@
 {
-    "api":{
-        "/api/query"
-    },
-
-    "auth":{
-        "category":"basic",
-        "run":"once"
-    },
-
-    "method":{
-        "GET"
-    },
-
-    "request":{
-        "header":{
-
-        },
-        "body":{
-
-        },
-    },
-
-    "assertion":{
-
-    }
+	"url": "/api/query",
+	"method": "GET",
+	"headers": {
+	},
+	"body": {
+	},
+	"test": {
+	}
 }

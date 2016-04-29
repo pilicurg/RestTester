@@ -8,7 +8,7 @@ import json
 class Parser(object):
     def __init__(self):
         self.list_name = "TC_list.json"
-        self.parsed = []
+        self._parsed = []
         
     def set_suite(self, suite):
         self.suite = suite
@@ -24,14 +24,26 @@ class Parser(object):
 
     def _parse_auth(self):
         if self.data.get(u'auth'):
-            self.parsed.append({'url':self.data.get(u'auth').get('url'),
-                                ''
+            d={}
+            d['method'] = 'GET'
+            d['url'] = self.data.get(u'host').get('url') + self.data.get(u'auth').get('url')
 
+            self._parsed.append(d)
 
+    def _parse_tc(self):
+        for tc_name in self.data:
+            tc_file = os.path.join(self.suite, tc_name)
+            with open(tc_file) as tc:
+                tc_data = json.load(tc)
 
-                                })
+            d={}
+            d['method'] = tc_data.get('method','GET')
+            d['url'] = tc_data.get('url')
+            d['headers'] = tc_data.get('headers')
+            d['data'] = tc_data.get('body')
+            d['test'] = tc_data.get('test')
 
-
+            self.
 
     def parse(self):
         self._parse_auth()

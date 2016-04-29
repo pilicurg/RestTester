@@ -2,13 +2,11 @@
 	"host":"http://10.0.0.0",
 	
 	"auth":{
-		"category":"basic",
-		"url":"api/simulate",
-		"save_cookies":true
+		"url":"/api/simulate",
 	},
 
 	"list":[
-		"TC1",
+		"TC1.json",
 		"TC2.json"
 	]
 
