@@ -1,8 +1,11 @@
 {
 	"host":"http://10.0.0.0",
-	
+
 	"auth":{
 		"url":"/api/simulate",
+		"test":{
+			"status_code": "200"
+		}
 	},
 
 	"list":[

@@ -5,58 +5,52 @@
 import os.path
 import json
 
-class Parser(object):
-    def __init__(self):
-        self.list_name = "TC_list.json"
-        self._parsed = []
-        
-    def set_suite(self, suite):
-        self.suite = suite
-        self._load_suite()
 
-    def _load_suite(self):
-        tc_list = os.path.join(self.suite, self.list_name)
+class Parser(object):
+    def __init__(self, suite):
+        self._load_suite(suite)
+        self._parsed = []
+        self._suite = suite
+
+    def _load_suite(self, suite, list_name="TC_list.json"):
+        tc_list = os.path.join(suite, list_name)
         with open(tc_list) as f:
             self.data = json.load(f)
+        self._host = self.data.get('host', '')
 
     def get_data(self):
         return self.data
 
     def _parse_auth(self):
-        if self.data.get(u'auth'):
-            d={}
-            d['method'] = 'GET'
-            d['url'] = self.data.get(u'host').get('url') + self.data.get(u'auth').get('url')
-
-            self._parsed.append(d)
+        if self.data.get('auth'):
+            self._insert(self.data.get('auth'), 'auth')
 
     def _parse_tc(self):
-        for tc_name in self.data:
-            tc_file = os.path.join(self.suite, tc_name)
+        for tc_name in self.data.get('list'):
+            tc_file = os.path.join(self._suite, tc_name)
+            print tc_file
             with open(tc_file) as tc:
-                tc_data = json.load(tc)
+                data = json.load(tc)
+            self._insert(data)
 
-            d={}
-            d['method'] = tc_data.get('method','GET')
-            d['url'] = tc_data.get('url')
-            d['headers'] = tc_data.get('headers')
-            d['data'] = tc_data.get('body')
-            d['test'] = tc_data.get('test')
-
-            self.
+    def _insert(self, data, types='tc'):
+        self._parsed.append(dict(method=data.get('method', 'GET'),
+                                 url=self._host + data.get('url'),
+                                 headers=data.get('headers'),
+                                 data=data.get('body'),
+                                 test=data.get('test'),
+                                 type=types))
 
     def parse(self):
         self._parse_auth()
         self._parse_tc()
 
-
+        return self._parsed
 
 
 if __name__ == '__main__':
-    p = Parser()
-
-    suite = os.path.normpath(os.path.join(os.path.dirname(__file__),'../TC'))
-    p.set_suite(suite)
-
+    suite_folder = os.path.normpath(os.path.join(os.path.dirname(__file__), '../TC'))
+    print suite_folder
+    p = Parser(suite_folder)
     print p.get_data()
     print p.parse()

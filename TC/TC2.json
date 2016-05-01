@@ -1,11 +1,10 @@
 {
-	"url": "/api/query",
-	"method": "GET",
+	"url": "/api/query2",
+	"method": "POST",
 	"headers": {
 	},
 	"body": {
 	},
 	"test": {
 	}
-
 }
