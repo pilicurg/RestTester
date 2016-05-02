@@ -1,6 +1,12 @@
 # RestTester
 a REST tester written in Python
 
+## usage
+
+
+## assertion syntax
+
+
 ## src
 scripts in Python
 

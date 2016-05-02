@@ -6,6 +6,8 @@
 	"body": {
 	},
 	"test": {
+		"pro.p.q":{"has":"S"},
+		"sort":{"sorted": "asc", "max":5}
 	}
 
 }

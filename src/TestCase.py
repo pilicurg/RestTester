@@ -6,7 +6,6 @@ import Tester
 import requests
 
 
-
 class TestCase(object):
     def __init__(self, params):
         self._params = params
@@ -17,13 +16,33 @@ class TestCase(object):
         if self._params.get('type') == 'auth':
             # s = requests.Session()
             # r = s.request(**self._params)
-            # self.tester.test(r)
+            r={
+                "show": "a",
+                "pro": {
+                    "p": {"q": {"S": "T"}},
+                    "S": "T"
+                },
+                "sort": [1, 2, 3, 4],
+                "status_code": 200
+               }
+            self.tester.test(r)
             # return s
             print 'a'
             return 'a'
         elif self._params.get('type') == 'tc':
             # r = session.request(**self._params)
-            # self.tester.test(r)
+
+            r={
+                "show": "a",
+                "pro": {
+                    "p": {"q": {"S": "T"}},
+                    "S": "T"
+                },
+                "sort": [1, 2, 5, 4],
+                "status_code": 200
+               }
+
+            self.tester.test(r)
             # return session
             print 'tc'
             return 'tc'

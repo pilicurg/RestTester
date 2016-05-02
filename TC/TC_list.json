@@ -4,13 +4,12 @@
 	"auth":{
 		"url":"/api/simulate",
 		"test":{
-			"status_code": "200"
+			"status_code": {"is":200}
 		}
 	},
 
 	"list":[
-		"TC1.json",
-		"TC2.json"
+		"TC1.json"
 	]
 
 }
