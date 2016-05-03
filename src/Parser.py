@@ -16,7 +16,6 @@ class Parser(object):
         tc_list = os.path.join(suite, list_name)
         with open(tc_list) as f:
             self.data = json.load(f)
-        self._host = self.data.get('host', '')
 
     def get_data(self):
         return self.data
@@ -35,10 +34,10 @@ class Parser(object):
 
     def _insert(self, data, types='tc'):
         self._parsed.append(dict(method=data.get('method', 'GET'),
-                                 url=self._host + data.get('url'),
-                                 headers=data.get('headers'),
-                                 data=data.get('body'),
-                                 test=data.get('test'),
+                                 url=self.data.get('host', '') + data.get('url'),
+                                 headers=data.get('headers', {}),
+                                 data=data.get('body', {}),
+                                 test=data.get('test', {}),
                                  type=types))
 
     def parse(self):

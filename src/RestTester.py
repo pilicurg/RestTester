@@ -27,6 +27,6 @@ if __name__ == '__main__':
     # print args.accumulate(args.integers)
 
     suite_folder = os.path.normpath(os.path.join(os.path.dirname(__file__), '../TC'))
-    t = RestTester(suite_folder)
-    t.execute()
+    rt = RestTester(suite_folder)
+    rt.execute()
 
