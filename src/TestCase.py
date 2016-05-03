@@ -7,12 +7,21 @@ import requests
 
 
 class TestCase(object):
+    _name='a'
+
     def __init__(self, params):
         self._params = params
         self.tester = Tester.Tester(self._params.pop('test'))
+        self._name = self._params.pop('name', 'no_name')
         self._attr_list = ['method', 'url', 'headers', 'data', 'test', 'type']
 
+    def _before(self):
+        print '-'*30
+        print 'Running {}'.format(self._name)
+        print '-'*30
+
     def run(self, session=None):
+        self._before()
         if self._params.get('type') == 'auth':
             # s = requests.Session()
             # r = s.request(**self._params)
@@ -25,10 +34,7 @@ class TestCase(object):
                 "sort": [1, 2, 3, 4],
                 "status_code": 200
                }
-            self.tester.test(r)
-            # return s
-            print 'a'
-            return 'a'
+            print "{} {}".format(self._name, self.tester.test(r))
         elif self._params.get('type') == 'tc':
             # r = session.request(**self._params)
 
@@ -42,10 +48,11 @@ class TestCase(object):
                 "status_code": 200
                }
 
-            self.tester.test(r)
+            print "{} {}".format(self._name, self.tester.test(r))
+
             # return session
             print 'tc'
-            return 'tc'
+
 
 if __name__ == '__main__':
     info = {'headers': None, 'test': None, 'url': u'http://10.0.0.0/api/simulate',

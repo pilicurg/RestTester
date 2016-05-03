@@ -14,7 +14,6 @@ class Executor(object):
 
     def _factory(self):
         for params in self.parser.parse():
-            print 'params'+str(params)
             self.exec_list.append(TestCase.TestCase(params))
 
     def execute(self):

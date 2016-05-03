@@ -22,23 +22,23 @@ class Parser(object):
 
     def _parse_auth(self):
         if self.data.get('auth'):
-            self._insert(self.data.get('auth'), 'auth')
+            self._insert(self.data.get('auth'), 'auth', 'Authentication')
 
     def _parse_tc(self):
         for tc_name in self.data.get('list'):
             tc_file = os.path.join(self._suite, tc_name)
-            print tc_file
             with open(tc_file) as tc:
                 data = json.load(tc)
-            self._insert(data)
+            self._insert(data, 'tc', tc_name)
 
-    def _insert(self, data, types='tc'):
+    def _insert(self, data, types, tc_name=None):
         self._parsed.append(dict(method=data.get('method', 'GET'),
                                  url=self.data.get('host', '') + data.get('url'),
                                  headers=data.get('headers', {}),
                                  data=data.get('body', {}),
                                  test=data.get('test', {}),
-                                 type=types))
+                                 type=types,
+                                 name=tc_name))
 
     def parse(self):
         self._parse_auth()
