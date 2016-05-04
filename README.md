@@ -3,6 +3,11 @@ a REST tester written in Python
 
 ## usage
 
+```
+this is a piece of code
+```
+
+
 ## prerequisites
 
 

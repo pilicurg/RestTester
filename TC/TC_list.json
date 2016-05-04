@@ -1,15 +1,17 @@
 {
-	"host":"http://10.0.0.0",
+	"host":"https://test.youdata.com",
 
 	"auth":{
-		"url":"/api/simulate",
-		"test":{
-			"status_code": {"is":200}
+		"url":"/api/login/simulate?email=admin@corp.netease.com",
+		"test": {
+			"status_code": {
+				"is": 200
+			}
 		}
 	},
 
 	"list":[
-		"TC1.json"
+
 	]
 
 }
