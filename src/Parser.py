@@ -31,7 +31,7 @@ class Parser(object):
                 data = json.load(tc)
             self._insert(data, 'tc', tc_name)
 
-    def _insert(self, data, types, tc_name=None):
+    def _insert(self, data, types, tc_name=''):
         self._parsed.append(dict(method=data.get('method', 'GET'),
                                  url=self.data.get('host', '') + data.get('url'),
                                  headers=data.get('headers', {}),
