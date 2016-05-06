@@ -13,45 +13,102 @@ class TestCase(object):
         self._params = params
         self.tester = Tester(self._params.pop('test'))
         self._name = self._params.pop('name', 'no_name')
-        self._attr_list = ['method', 'url', 'headers', 'data', 'test', 'type']
 
-    def _before(self):
-        print '-'*30
+    def _print_title(self):
+        length = 30
+        print '-'*length
         print 'Running {}'.format(self._name)
-        print '-'*30
+        print '-'*length
 
     def run(self, session=None):
-        self._before()
+        self._print_title()
         if self._params.get('type') == 'auth':
-            # s = requests.Session()
-            # r = s.request(**self._params)
-            r={
-                "show": "a",
-                "pro": {
-                    "p": {"q": {"S": "T"}},
-                    "S": "T"
-                },
-                "sort": [1, 2, 3, 4],
-                "status_code": 200
-               }
-            print "{} {}".format(self._name, self.tester.test(r))
+            del self._params['type']
+            session = requests.Session()
+            res = session.request(**self._params)
+            # print 'auth', res
         elif self._params.get('type') == 'tc':
-            # r = session.request(**self._params)
+            del self._params['type']
+            res = session.request(**self._params)
+            print 'tc', res.text
+        print self.tester.test(res.json())
+        return session
 
-            r={
-                "show": "a",
-                "pro": {
-                    "p": {"q": {"S": "T"}},
-                    "S": "T"
-                },
-                "sort": [1, 2, 5, 4],
-                "status_code": 200
-               }
+class Params(object):
+    def __init__(self, **kwargs):
+        self._data = self._build(**kwargs)
 
-            print "{} {}".format(self._name, self.tester.test(r))
+    def _build(self,**kwargs):
+        self._method = kwargs.setdefault('method','GET')
+        self._url = kwargs.get('host') + kwargs.setdefault('method','GET')
 
-            # return session
-            print 'tc'
+    def request(self):
+        pass
+
+
+
+class Parser(object):
+    def __init__(self, suite):
+        self._load_suite(suite)
+        self._parsed = []
+        self._suite = suite
+
+    def _load_suite(self, suite, list_name="TC_list.json"):
+        tc_list = os.path.join(suite, list_name)
+        with open(tc_list) as f:
+            self.data = json.load(f)
+
+    def _parse_auth(self):
+        if self.data.get('auth'):
+            self._insert(self.data.get('auth'), 'auth', 'Authentication')
+
+    def _parse_tc(self):
+        for tc_name in self.data.get('list'):
+            tc_file = os.path.join(self._suite, tc_name)
+            with open(tc_file) as tc:
+                data = json.load(tc)
+            self._insert(data, 'tc', tc_name)
+
+    def _insert(self, data, types, tc_name=''):
+        d = dict(method=data.pop('method', 'GET'),
+                                 url=self.host + data.pop('url'),
+                                 headers=data.pop('headers',{}),
+                                 data=json.dumps(data.pop('body',{})),
+                                 test=data.pop('test', {}),
+                                 type=types,
+                                 name=tc_name)
+        self._parsed.append(dict(d, **data))
+
+    def parse(self):
+        self.host = self.data.get('host','')
+        self._parse_auth()
+        self._parse_tc()
+
+        return self._parsed
+
+
+class Executor(object):
+    def __init__(self, test_suite):
+        self.parser = Parser(test_suite)
+        self.exec_list = list()
+        self._factory()
+
+    def _factory(self):
+        for params in self.parser.parse():
+            self.exec_list.append(TestCase(params))
+
+    def execute(self):
+        # print self.exec_list
+        session = None
+        for tc in self.exec_list:
+            session = tc.run(session)
+
+class RestTester(object):
+    def __init__(self, test_suite):
+        self.executor = Executor(test_suite)
+
+    def execute(self):
+        self.executor.execute()
 
 
 class Tester(object):
@@ -72,8 +129,11 @@ class Tester(object):
 
     def _get_elem(self, res, path):
         chain = path.split('.')
+        print chain
         part = res.get(chain.pop(0))
+        print part
         for section in chain:
+            print part, section
             part = part.get(section)
 
         return part
@@ -126,71 +186,6 @@ class Tester(object):
         else:
             print "[FAIL] the minimum of {} is {}, not {}".format(name, min(array), minimum)
             return False
-
-
-class Parser(object):
-    def __init__(self, suite):
-        self._load_suite(suite)
-        self._parsed = []
-        self._suite = suite
-
-    def _load_suite(self, suite, list_name="TC_list.json"):
-        tc_list = os.path.join(suite, list_name)
-        with open(tc_list) as f:
-            self.data = json.load(f)
-
-    def get_data(self):
-        return self.data
-
-    def _parse_auth(self):
-        if self.data.get('auth'):
-            self._insert(self.data.get('auth'), 'auth', 'Authentication')
-
-    def _parse_tc(self):
-        for tc_name in self.data.get('list'):
-            tc_file = os.path.join(self._suite, tc_name)
-            with open(tc_file) as tc:
-                data = json.load(tc)
-            self._insert(data, 'tc', tc_name)
-
-    def _insert(self, data, types, tc_name=''):
-        self._parsed.append(dict(method=data.get('method', 'GET'),
-                                 url=self.data.get('host', '') + data.get('url'),
-                                 headers=data.get('headers', {}),
-                                 data=data.get('body', {}),
-                                 test=data.get('test', {}),
-                                 type=types,
-                                 name=tc_name))
-
-    def parse(self):
-        self._parse_auth()
-        self._parse_tc()
-
-        return self._parsed
-
-
-class Executor(object):
-    def __init__(self, test_suite):
-        self.parser = Parser(test_suite)
-        self.exec_list = list()
-        self._factory()
-
-    def _factory(self):
-        for params in self.parser.parse():
-            self.exec_list.append(TestCase(params))
-
-    def execute(self):
-        # print self.exec_list
-        session = None
-        for tc in self.exec_list:
-            session = tc.run(session)
-
-class RestTester(object):
-    def __init__(self, test_suite):
-        self.executor = Executor(test_suite)
-
-    def execute(self):
-        self.executor.execute()
 
 
 if __name__ == '__main__':

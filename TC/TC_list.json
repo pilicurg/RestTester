@@ -4,14 +4,15 @@
 	"auth":{
 		"url":"/api/login/simulate?email=admin@corp.netease.com",
 		"test": {
-			"status_code": {
+			"code": {
 				"is": 200
 			}
-		}
+		},
+		"verify":false
 	},
 
 	"list":[
-
+		"TC1.json"
 	]
 
 }
