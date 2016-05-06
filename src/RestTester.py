@@ -35,7 +35,7 @@ class TestCase(object):
         return session
 
 class Params(object):
-    def __init__(self, **kwargs):
+    def __init__(self, type, **kwargs):
         self._data = self._build(**kwargs)
 
     def _build(self,**kwargs):
@@ -59,8 +59,7 @@ class Parser(object):
             self.data = json.load(f)
 
     def _parse_auth(self):
-        if self.data.get('auth'):
-            self._insert(self.data.get('auth'), 'auth', 'Authentication')
+        self._insert(self.data.get('auth'), 'auth', 'Authentication')
 
     def _parse_tc(self):
         for tc_name in self.data.get('list'):
