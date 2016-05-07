@@ -11,8 +11,8 @@ import requests
 class TestCase(object):
     def __init__(self, params):
         self._params = params
-        self.tester = Tester(self._params.pop('test'))
-        self._name = self._params.pop('name', 'no_name')
+        self.tester = Tester(self._params.get_value('test'))
+        self._name = self._params.get_value('name')
 
     def _print_title(self):
         length = 30
@@ -22,33 +22,41 @@ class TestCase(object):
 
     def run(self, session=None):
         self._print_title()
-        if self._params.get('type') == 'auth':
-            del self._params['type']
+        if self._params.get_value('type') == 'auth':
             session = requests.Session()
-            res = session.request(**self._params)
+            print self._params.get_params()
+            # res = session.request(self._params.get_params())
             # print 'auth', res
-        elif self._params.get('type') == 'tc':
-            del self._params['type']
+        elif self._params.get_value('type') == 'tc':
             res = session.request(**self._params)
             print 'tc', res.text
         print self.tester.test(res.json())
         return session
 
+
 class Params(object):
-    def __init__(self, type, **kwargs):
-        self._data = self._build(**kwargs)
+    def __init__(self, **kwargs):
+        self._method = kwargs.get('method', 'GET')
+        self._host = kwargs.get('host', '')
+        self._url = self._host + kwargs.get('url', '')
+        self._headers = kwargs.get('headers', {})
+        self._data = kwargs.get('body', {})
+        self._type = kwargs.get('type', 'tc')
+        self._name = kwargs.get('name', '')
+        self._test = kwargs.get('test', {})
 
-    def _build(self,**kwargs):
-        self._method = kwargs.setdefault('method','GET')
-        self._url = kwargs.get('host') + kwargs.setdefault('method','GET')
+    def get_params(self, key_list=None):
+        if key_list is None:
+            key_list = ['method', 'url', 'headers', 'data']
+        return {key: getattr(self, '_'+key) for key in key_list}
 
-    def request(self):
-        pass
-
+    def get_value(self, key):
+        return getattr(self, '_'+key)
 
 
 class Parser(object):
     def __init__(self, suite):
+        self.host = ''
         self._load_suite(suite)
         self._parsed = []
         self._suite = suite
@@ -59,27 +67,25 @@ class Parser(object):
             self.data = json.load(f)
 
     def _parse_auth(self):
-        self._insert(self.data.get('auth'), 'auth', 'Authentication')
+        p = Params(host=self.host,
+                   type='auth',
+                   name='Authentication',
+                  **self.data.get('auth'))
+        self._parsed.append(p)
 
     def _parse_tc(self):
         for tc_name in self.data.get('list'):
             tc_file = os.path.join(self._suite, tc_name)
             with open(tc_file) as tc:
                 data = json.load(tc)
-            self._insert(data, 'tc', tc_name)
-
-    def _insert(self, data, types, tc_name=''):
-        d = dict(method=data.pop('method', 'GET'),
-                                 url=self.host + data.pop('url'),
-                                 headers=data.pop('headers',{}),
-                                 data=json.dumps(data.pop('body',{})),
-                                 test=data.pop('test', {}),
-                                 type=types,
-                                 name=tc_name)
-        self._parsed.append(dict(d, **data))
+            p = Params(host=self.host,
+                      type='tc',
+                      name=tc_name,
+                      **data)
+            self._parsed.append(p)
 
     def parse(self):
-        self.host = self.data.get('host','')
+        self.host = self.data.get('host', '')
         self._parse_auth()
         self._parse_tc()
 
@@ -101,6 +107,7 @@ class Executor(object):
         session = None
         for tc in self.exec_list:
             session = tc.run(session)
+
 
 class RestTester(object):
     def __init__(self, test_suite):
