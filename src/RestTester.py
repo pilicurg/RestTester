@@ -30,28 +30,42 @@ class TestCase(object):
         elif self._params.get_value('type') == 'tc':
             res = session.request(**self._params)
             print 'tc', res.text
-        print self.tester.test(res.json())
+        # print self.tester.test(res.json())
         return session
 
 
 class Params(object):
-    def __init__(self, **kwargs):
-        self._method = kwargs.get('method', 'GET')
-        self._host = kwargs.get('host', '')
-        self._url = self._host + kwargs.get('url', '')
-        self._headers = kwargs.get('headers', {})
-        self._data = kwargs.get('body', {})
-        self._type = kwargs.get('type', 'tc')
-        self._name = kwargs.get('name', '')
-        self._test = kwargs.get('test', {})
+    def __init__(self,
+                 method='GET',
+                 host='',
+                 url='',
+                 headers=None,
+                 body=None,
+                 types='tc',
+                 name='unknown',
+                 test=None,
+                 **kwargs):
+        self._method = method
+        self._host = host
+        self._url = host+url
+        self._headers = headers or {}
+        self._data = body or {}
+        self._type = types
+        self._name = name
+        self._test = test or {}
+        self._others = kwargs
 
     def get_params(self, key_list=None):
         if key_list is None:
             key_list = ['method', 'url', 'headers', 'data']
-        return {key: getattr(self, '_'+key) for key in key_list}
+        basic_params = {key: getattr(self, '_'+key) for key in key_list}
+        return dict(basic_params, **self._others)
 
     def get_value(self, key):
         return getattr(self, '_'+key)
+
+    def get_type(self):
+        return self._type
 
 
 class Parser(object):
@@ -68,9 +82,9 @@ class Parser(object):
 
     def _parse_auth(self):
         p = Params(host=self.host,
-                   type='auth',
+                   types='auth',
                    name='Authentication',
-                  **self.data.get('auth'))
+                   **self.data.get('auth'))
         self._parsed.append(p)
 
     def _parse_tc(self):
@@ -79,9 +93,9 @@ class Parser(object):
             with open(tc_file) as tc:
                 data = json.load(tc)
             p = Params(host=self.host,
-                      type='tc',
-                      name=tc_name,
-                      **data)
+                       types='tc',
+                       name=tc_name,
+                       **data)
             self._parsed.append(p)
 
     def parse(self):
@@ -95,7 +109,7 @@ class Parser(object):
 class Executor(object):
     def __init__(self, test_suite):
         self.parser = Parser(test_suite)
-        self.exec_list = list()
+        self.exec_list = []
         self._factory()
 
     def _factory(self):
@@ -103,7 +117,6 @@ class Executor(object):
             self.exec_list.append(TestCase(params))
 
     def execute(self):
-        # print self.exec_list
         session = None
         for tc in self.exec_list:
             session = tc.run(session)

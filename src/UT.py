@@ -14,8 +14,11 @@ class TestParams(unittest.TestCase):
         self.assertEqual(method, 'GET')
 
     def test_get_value2(self):
-        method = self.p.get_params()
-        print method
+        method = self.p.get_params_for_request()
+        self.assertIn('url', method)
+        self.assertIn('headers', method)
+        self.assertIn('data', method)
+        self.assertIn('method', method)
 
 
 class TestTestCase(unittest.TestCase):
