@@ -15,7 +15,7 @@ class Tester(object):
                 if getattr(self, "_" + comparator)(path, elem_value, assert_value):
                     passed = passed+1
 
-        return "{}/{} passed.".format(passed, total)
+        return passed, total
 
     def _get_elem(self, res, path):
         "addressing elements within nested dictionary by dotted notation"
@@ -46,17 +46,6 @@ class Tester(object):
                 for i in index_list:
                     bulk = bulk[int(i)]
         return bulk
-
-
-        # chain = path.split('.')
-        #
-        # part = res.get(chain.pop(0))
-        # print part
-        # for section in chain:
-        #     print part, section
-        #     part = part.get(section)
-        #
-        # return part
 
     def _equals(self, name, left, right):
         if left == right:

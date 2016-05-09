@@ -13,6 +13,7 @@ class TestCase(object):
         self._params = params
         self.tester = Tester.Tester(self._params.get_value('test'))
         self._name = self._params.get_value('name')
+        self._session = None
 
     def _print_title(self):
         length = 30
@@ -22,17 +23,24 @@ class TestCase(object):
 
     def run(self, session=None):
         self._print_title()
+        res = self._make_request(session)
+        passed, total = self.tester.test(res.json())
+        if passed == total:
+            result = "Passed"
+        else:
+            result = "Failed"
+        print "{}/{} passed.".format(passed, total)
+
+        return self._name, result
+
+    def _make_request(self, session):
         if self._params.get_value('type') == 'auth':
             session = requests.Session()
-            print self._params.get_params()
-            res = session.request(**self._params.get_params())
-            print self.tester.test(res.json())
-        elif self._params.get_value('type') == 'tc':
-            print self._params.get_params()
-            res = session.request(**self._params.get_params())
-            print self.tester.test(res.json())
+            self._session = session
+        return session.request(**self._params.get_params())
 
-        return session
+    def get_session(self):
+        return self._session
 
 
 class Params(object):
@@ -114,6 +122,7 @@ class Executor(object):
     def __init__(self, test_suite):
         self.parser = Parser(test_suite)
         self.exec_list = []
+        self.result = []
         self._factory()
 
     def _factory(self):
@@ -123,16 +132,60 @@ class Executor(object):
     def execute(self):
         session = None
         for tc in self.exec_list:
-            session = tc.run(session)
+            name, result = tc.run(session)
+            self.result.append((name, result))
+            session = tc.get_session()
 
+    def get_result(self):
+        return self.result
+
+
+class Reporter(object):
+    def __init__(self):
+        self._name_title = 'Test Case'
+        self._result_title = 'Result'
+
+    def report(self, data):
+        self.calc_column_width(data)
+        self._print_line()
+        self._print_title()
+        self._print_line()
+        self._print_result(data)
+        self._print_line()
+
+    def calc_column_width(self, data):
+        padding = 4
+        name, result = zip(*data)
+        self._name_width = max(len(self._name_title),len(max(name, key=len))) + padding
+        self._result_width = max(len(self._result_title), len(max(result, key=len))) + padding
+        self.no_width = 2*(int((len(str(len(data)))+1)/2)) + padding
+
+    def _print_title(self):
+        print '{:^{w1}}|{:^{w2}}|{:^{w3}}'.format('No', self._name_title, self._result_title,
+                                                 w1=self.no_width,
+                                                 w2=self._name_width,
+                                                 w3=self._result_width)
+
+    def _print_line(self):
+        print '-'*(self.no_width + self._name_width + self._result_width + 2)
+
+    def _print_result(self, data):
+        i=1
+        for name, result in data:
+            print  '{:^{w1}}|{:^{w2}}|{:^{w3}}'.format(i, name, result,
+                                                 w1=self.no_width,
+                                                 w2=self._name_width,
+                                                 w3=self._result_width)
+            i=i+1
 
 class RestTester(object):
     def __init__(self, test_suite):
         self.executor = Executor(test_suite)
+        self.reporter = Reporter()
 
     def execute(self):
         self.executor.execute()
-
+        self.reporter.report(self.executor.get_result())
 
 
 if __name__ == '__main__':
