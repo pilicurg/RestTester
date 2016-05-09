@@ -6,12 +6,12 @@ import os
 import sys
 import json
 import requests
-
+import Tester
 
 class TestCase(object):
     def __init__(self, params):
         self._params = params
-        self.tester = Tester(self._params.get_value('test'))
+        self.tester = Tester.Tester(self._params.get_value('test'))
         self._name = self._params.get_value('name')
 
     def _print_title(self):
@@ -25,12 +25,13 @@ class TestCase(object):
         if self._params.get_value('type') == 'auth':
             session = requests.Session()
             print self._params.get_params()
-            # res = session.request(self._params.get_params())
-            # print 'auth', res
+            res = session.request(**self._params.get_params())
+            print self.tester.test(res.json())
         elif self._params.get_value('type') == 'tc':
-            res = session.request(**self._params)
-            print 'tc', res.text
-        # print self.tester.test(res.json())
+            print self._params.get_params()
+            res = session.request(**self._params.get_params())
+            print self.tester.test(res.json())
+
         return session
 
 
@@ -49,7 +50,7 @@ class Params(object):
         self._host = host
         self._url = host+url
         self._headers = headers or {}
-        self._data = body or {}
+        self._data = body and json.dumps(body) or {}
         self._type = types
         self._name = name
         self._test = test or {}
@@ -59,7 +60,10 @@ class Params(object):
         if key_list is None:
             key_list = ['method', 'url', 'headers', 'data']
         basic_params = {key: getattr(self, '_'+key) for key in key_list}
-        return dict(basic_params, **self._others)
+        if self._type == 'auth':
+            return dict(basic_params, **self._others)
+        else:
+            return basic_params
 
     def get_value(self, key):
         return getattr(self, '_'+key)
@@ -129,82 +133,6 @@ class RestTester(object):
     def execute(self):
         self.executor.execute()
 
-
-class Tester(object):
-    def __init__(self, test):
-        self._test = test
-
-    def test(self, res):
-        passed = 0
-        total = 0
-        for path, assertion in self._test.iteritems():
-            elem_value = self._get_elem(res, path)
-            for comparator, assert_value in assertion.iteritems():
-                total = total+1
-                if getattr(self, "_" + comparator)(path, elem_value, assert_value):
-                    passed = passed+1
-
-        return "{}/{} passed.".format(passed, total)
-
-    def _get_elem(self, res, path):
-        chain = path.split('.')
-        print chain
-        part = res.get(chain.pop(0))
-        print part
-        for section in chain:
-            print part, section
-            part = part.get(section)
-
-        return part
-
-    def _is(self, name, left, right):
-        if left == right:
-            print "[PASS] {} is {}".format(name, right)
-            return True
-        else:
-            print "[FAIL] {} is {}, not {}".format(name, left, right)
-            return False
-
-    def _has(self, name, obj, elem):
-        if elem in obj:
-            print "[PASS] {} has {}".format(name, elem)
-            return True
-        else:
-            print "[FAIL] {} does have {}".format(name, elem)
-            return False
-
-    def _sorted(self, name, array, direction):
-        if direction == 'asc':
-            if array and all([array[i+1] > array[i] for i in range(len(array)-1)]):
-                print "[PASS] {} is in ascending order".format(name)
-                return True
-            else:
-                print "[FAIL] {} is not in ascending order: {}".format(name, array)
-                return False
-
-        elif direction == 'desc':
-            if array and all([array[i+1] < array[i] for i in range(len(array)-1)]):
-                print "[PASS] {} is in descending order".format(name)
-                return True
-            else:
-                print "[FAIL] {} is not in descending order: {}".format(name, array)
-                return False
-
-    def _max(self, name, array, maximum):
-        if max(array) <= maximum:
-            print "[PASS] the maximum of {} is {}".format(name, maximum)
-            return True
-        else:
-            print "[FAIL] the maximum of {} is {}, not {}".format(name, max(array), maximum)
-            return False
-
-    def _min(self, name, array, minimum):
-        if min(array) >= minimum:
-            print "[PASS] the minimum of {} is {}".format(name, minimum)
-            return True
-        else:
-            print "[FAIL] the minimum of {} is {}, not {}".format(name, min(array), minimum)
-            return False
 
 
 if __name__ == '__main__':
