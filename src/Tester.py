@@ -58,7 +58,7 @@ class Tester(object):
         #
         # return part
 
-    def _is(self, name, left, right):
+    def _equals(self, name, left, right):
         if left == right:
             print "[PASS] {} is {}".format(name, right)
             return True

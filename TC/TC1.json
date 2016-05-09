@@ -1,5 +1,4 @@
 {
-	"link":"",
 	"url": "/api/report/query",
 	"method": "POST",
 	"headers": {"Content-Type":"application/json",
@@ -7,8 +6,8 @@
 	},
 	"body": {"reportId":"3284","query":{"$type":"VisualQuery","column":[{"$type":"DimensionPill","tableId":0,"tableName":"inventory_fact_1997","role":"Dimension","field":"store_id","alias":"store_id","interpretation":"Discrete","dataType":"Whole","isCalc":false,"granularity":"g0","fieldId":"2018","_cid":7}],"row":[{"$type":"MeasurePill","tableId":0,"tableName":"inventory_fact_1997","role":"Measure","field":"store_invoice","alias":"store_invoice","interpretation":"Continuous","dataType":"Decimal","isCalc":false,"aggregator":"SUM","granularity":"g0","fieldId":"2264","_cid":14}],"measures":[],"markMatrix":[],"mark":{"$type":"Mark","marktype":"Automatic","labels":[],"details":[]},"filter":[],"offsetLimit":[0,20]},"options":{"sizeMap":{},"chart":{"limit":20},"referenceline":{},"marksColor":{},"formatMap":{},"sort":{}},"skipCache":true},
 	"test": {
-		"code":{"is":200},
-		"result.marksCount": {"is": 13},
+		"code":{"equals":200},
+		"result.marksCount": {"equals": 13},
 		"result.preSynthesizeResult.smallDatasets[0][0][0][0].order.store_id":{"sorted": "asc"}
 	}
 
