@@ -1,5 +1,5 @@
 # RestTester
-a REST tester written in Python, Runs REST API tests which are defined by several test cases written in JSON format.
+a REST tester written in Python, Runs REST API tests which are defined by several test cases written in JSON format. This scripts exploits the excellence of [Requests](https://github.com/kennethreitz/requests) module which makes it very simple to implement.
 
 ## Features
 - test cases are written in JSON format
@@ -40,7 +40,7 @@ The url, method, headers and body are necessary parameters to make a request so 
 The test part is for assertion, and is human readable. The supported assertions are:
 - equals
 - has
-- sorted
+- sorted, asc and desc
 - max
 - min
 
