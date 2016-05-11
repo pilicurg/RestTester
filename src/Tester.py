@@ -51,10 +51,10 @@ class Tester(object):
 
     def _equals(self, name, left, right):
         if left == right:
-            print "[PASS] {} is {}".format(name, right)
+            print "[PASS] {} equals {}".format(name, right)
             return True
         else:
-            print "[FAIL] {} is {}, not {}".format(name, left, right)
+            print "[FAIL] {} equals {}, not {}".format(name, left, right)
             return False
 
     def _has(self, name, obj, elem):
