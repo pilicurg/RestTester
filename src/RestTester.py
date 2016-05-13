@@ -29,6 +29,12 @@ class Executor(object):
     def get_result(self):
         return self.result
 
+    def verdict(self):
+        name, result = zip(*self.result)
+        if result and all([x == "Passed" for x in result]):
+            return "Passed"
+        else:
+            return "Failed"
 
 class Reporter(object):
     def __init__(self):
@@ -82,6 +88,10 @@ class RestTester(object):
     def execute(self):
         self.executor.execute()
         self.reporter.report(self.executor.get_result())
+        if self.executor.verdict() == "Passed":
+            exit(0)
+        elif self.executor.verdict() == "Failed":
+            exit(1)
 
 
 if __name__ == '__main__':

@@ -14,15 +14,15 @@ class Tester(object):
             elem_value = self._get_elem(res, path)
             for comparator, assert_value in assertion.iteritems():
                 total = total+1
-                if getattr(self, "_" + comparator)(path, elem_value, assert_value):
+                if getattr(self, "_" + comparator)(path.encode('utf-8'), elem_value, assert_value):
                     passed = passed+1
 
         return passed, total
 
     def _get_elem(self, res, path):
         "addressing elements within nested dictionary by dotted notation"
-        p_parts = re.compile(r'(\w+)((\[\d+\])*)')
-        p_index = re.compile(r'\[\d+\]')
+        p_parts = re.compile(ur'([()+\-\w\u4e00-\u9fff]+)((\[\d+\])*)')
+        p_index = re.compile(ur'\[\d+\]')
         parts = path.split('.')
 
         bulk = res
@@ -49,51 +49,57 @@ class Tester(object):
                     bulk = bulk[int(i)]
         return bulk
 
+    def _unify_format(self, token):
+        if type(token) is unicode:
+            return token.encode('utf-8')
+        else:
+            return str(token)
+
     def _equals(self, name, left, right):
         if left == right:
-            print "[PASS] {} equals {}".format(name, right)
+            print "{} equals {}".format(name, self._unify_format(right))
             return True
         else:
-            print "[FAIL] {} equals {}, not {}".format(name, left, right)
+            print "[**FAIL**] {} equals {}, not {}".format(name, self._unify_format(left), self._unify_format(right))
             return False
 
     def _has(self, name, obj, elem):
         if elem in obj:
-            print "[PASS] {} has {}".format(name, elem)
+            print "{} has {}".format(name, self._unify_format(elem))
             return True
         else:
-            print "[FAIL] {} does have {}".format(name, elem)
+            print "[**FAIL**] {} does have {}".format(name, self._unify_format(elem))
             return False
 
     def _sorted(self, name, array, direction):
         if direction == 'asc':
             if array and all([float(array[i+1]) > float(array[i]) for i in range(len(array)-1)]):
-                print "[PASS] {} is in ascending order".format(name)
+                print "{} is in ascending order".format(name)
                 return True
             else:
-                print "[FAIL] {} is not in ascending order: {}".format(name, array)
+                print "[**FAIL**] {} is not in ascending order: {}".format(name, self._unify_format(array))
                 return False
 
         elif direction == 'desc':
             if array and all([float(array[i+1]) < float(array[i]) for i in range(len(array)-1)]):
-                print "[PASS] {} is in descending order".format(name)
+                print "{} is in descending order".format(name)
                 return True
             else:
-                print "[FAIL] {} is not in descending order: {}".format(name, array)
+                print "[**FAIL**] {} is not in descending order: {}".format(name, self._unify_format(array))
                 return False
 
     def _max(self, name, array, maximum):
         if max(array) <= maximum:
-            print "[PASS] the maximum of {} is {}".format(name, maximum)
+            print "the maximum of {} is {}".format(name, self._unify_format(maximum))
             return True
         else:
-            print "[FAIL] the maximum of {} is {}, not {}".format(name, max(array), maximum)
+            print "[**FAIL**] the maximum of {} is {}, not {}".format(name, max(array), self._unify_format(maximum))
             return False
 
     def _min(self, name, array, minimum):
         if min(array) >= minimum:
-            print "[PASS] the minimum of {} is {}".format(name, minimum)
+            print "the minimum of {} is {}".format(name, self._unify_format(minimum))
             return True
         else:
-            print "[FAIL] the minimum of {} is {}, not {}".format(name, min(array), minimum)
+            print "[**FAIL**] the minimum of {} is {}, not {}".format(name, min(array), self._unify_format(minimum))
             return False

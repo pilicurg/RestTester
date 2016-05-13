@@ -34,7 +34,7 @@ class TestCase(object):
     def _make_request(self, session):
         if self._params.get_value('type') == 'auth':
             session = requests.Session()
-            self._session = session
+        self._session = session
         return session.request(**self._params.get_params())
 
     def get_session(self):
@@ -61,6 +61,9 @@ class Params(object):
         self._name = name
         self._test = test or {}
         self._others = kwargs
+
+        if "_comment" in self._others:
+            del self._others["_comment"]
 
     def get_params(self, key_list=None):
         if key_list is None:
