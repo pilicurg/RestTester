@@ -1,8 +1,8 @@
 {
-	"host":"https://test.youdata.com",
+	"host":"http://www.example.com",
 
 	"auth":{
-		"url":"/api/login/simulate?email=admin@corp.netease.com",
+		"url":"/api",
 		"test": {
 			"code": {
 				"equals": 200
